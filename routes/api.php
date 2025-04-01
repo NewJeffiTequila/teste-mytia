@@ -22,12 +22,4 @@ Route::post('/auth/login', [UserController::class, 'loginUser']);
 Route::post('/auth/sendInvite', [InvitationController::class, 'sendInvite']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/products', [ProductController::class, 'index']); // Aberto a todos
-    Route::get('/products/{id}', [ProductController::class, 'show']); // Aberto a todos
-
-    Route::middleware(['admin_or_moderator'])->group(function () {
-        Route::post('/products', [ProductController::class, 'store']); // Criar produto
-        Route::put('/products/{id}', [ProductController::class, 'update']); // Editar produto
-        Route::delete('/products/{id}', [ProductController::class, 'destroy']); // Remover produto
-    });
 });
