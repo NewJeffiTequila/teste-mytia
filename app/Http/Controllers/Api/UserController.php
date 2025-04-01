@@ -5,9 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\ResetPasswordMail;
+use App\Models\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -102,5 +107,52 @@ class UserController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'password' => 'required|min:6|confirmed'
+        ]);
+
+        // Verificar se o token é válido
+        $passwordReset = PasswordReset::where('token', $request->token)->first();
+
+        if (!$passwordReset) {
+            return response()->json(['error' => 'Token inválido ou expirado.'], 400);
+        }
+
+        // Atualizar a senha do usuário
+        $user = User::where('email', $passwordReset->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Remover token do banco
+        $passwordReset->delete();
+
+        return response()->json(['message' => 'Senha redefinida com sucesso!']);
+    }
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+
+        // Gerar token único
+        $token = Str::random(64);
+
+        // Remover tokens antigos
+        PasswordReset::where('email', $request->email)->delete();
+
+        // Criar novo token no banco
+        PasswordReset::create([
+            'email' => $request->email,
+            'token' => $token,
+            'created_at' => Carbon::now()
+        ]);
+
+        // Enviar e-mail com o link de reset
+        Mail::to($request->email)->send(new ResetPasswordMail($token));
+
+        return response()->json(['message' => 'E-mail de redefinição enviado!']);
     }
 }
