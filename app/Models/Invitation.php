@@ -8,7 +8,7 @@ class Invitation extends Model
 {
     use HasFactory;
 
-    protected $table = 'invitations'; // Define a tabela no banco
+    protected $table = 'invitations';
 
     protected $fillable = [
         'email',
@@ -18,13 +18,13 @@ class Invitation extends Model
     ];
 
     protected $casts = [
-        'expires_at' => 'datetime', // Converte automaticamente para um objeto Carbon
+        'expires_at' => 'datetime',
     ];
 
-    public $timestamps = true; // Mantém created_at e updated_at
+    public $timestamps = true;
 
     /**
-     * Verifica se o convite está expirado.
+     *
      *
      * @return bool
      */

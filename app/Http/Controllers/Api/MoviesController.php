@@ -7,11 +7,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Favorite;
 use App\Models\PopularMovie;
+use App\Repositories\Interfaces\PopularMovieRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class MoviesController extends Controller
 {
+
+    private $popularMovieRepository;
+
+    public function __construct(PopularMovieRepositoryInterface $popularMovieRepository)
+    {
+        $this->popularMovieRepository = $popularMovieRepository;
+    }
     // Buscar filme/série na OMDb API
     public function searchMovie(Request $request)
     {
@@ -30,11 +38,9 @@ class MoviesController extends Controller
 
         $data = $response->json();
 
-        // Salva em cache
         Cache::put($cacheKey, $data, now()->addHours(6));
 
-        // Salva no banco se ainda não estiver lá
-        PopularMovie::firstOrCreate(['title' => $title]);
+        $this->popularMovieRepository->save($title);
 
         return $data;
 
@@ -42,7 +48,6 @@ class MoviesController extends Controller
         return response()->json($response->json());
     }
 
-    // Adicionar aos favoritos
     public function addFavorite(Request $request)
     {
         $request->validate([
@@ -55,7 +60,6 @@ class MoviesController extends Controller
 
         $user = Auth::user();
 
-        // Evitar duplicação
         if (Favorite::where('user_id', $user->id)->where('imdb_id', $request->imdb_id)->exists()) {
             return response()->json(['message' => 'Já está nos favoritos'], 400);
         }
@@ -72,14 +76,12 @@ class MoviesController extends Controller
         return response()->json(['message' => 'Adicionado aos favoritos', 'data' => $favorite], 201);
     }
 
-    // Listar favoritos do usuário autenticado
     public function listFavorites()
     {
         $favorites = Auth::user()->favorites;
         return response()->json($favorites);
     }
 
-    // Remover favorito
     public function removeFavorite($imdb_id)
     {
         $user = Auth::user();

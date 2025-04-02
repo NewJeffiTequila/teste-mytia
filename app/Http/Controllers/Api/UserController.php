@@ -113,12 +113,6 @@ class UserController extends Controller
     public function resetPassword(ResetPasswordRequest  $request)
     {
 
-        // $request->validate([
-        //     'token' => 'required',
-        //     'password' => 'required|confirmed',
-        //     'newPassword' => 'required|min:6|confirmed'
-        // ]);
-
         $passwordReset = PasswordReset::where('token', $request->token)->first();
 
         if (!$passwordReset) {

@@ -36,7 +36,7 @@ class ReviewController extends Controller
 
         $reviews = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($title) {
             $data = Review::where('title', $title)->get();
-            return $data->isEmpty() ? null : $data; // Se estiver vazio, salva NULL no cache
+            return $data->isEmpty() ? null : $data;
         });
 
         if (empty($reviews)) {
