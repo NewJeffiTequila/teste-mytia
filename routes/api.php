@@ -4,7 +4,7 @@ use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\MoviesController;
-
+use App\Http\Controllers\Api\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,4 +27,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/movies/favorite', [MoviesController::class, 'addFavorite']);
     Route::get('/movies/favorites', [MoviesController::class, 'listFavorites']);
     Route::delete('/movies/favorite/{imdb_id}', [MoviesController::class, 'removeFavorite']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
+    Route::get('/reviews/{title}', [ReviewController::class, 'listByTitle']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->middleware('admin');
 });

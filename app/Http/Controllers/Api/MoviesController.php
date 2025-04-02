@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Favorite;
+use App\Models\PopularMovie;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class MoviesController extends Controller
 {
@@ -17,12 +19,25 @@ class MoviesController extends Controller
 
         $apiKey = env('OMDB_API_KEY');
         $title = $request->title;
+        $cacheKey = "movie_{$title}";
 
         $response = Http::get("http://www.omdbapi.com/?apikey={$apiKey}&t=" . urlencode($title));
 
         if ($response->failed()) {
             return response()->json(['error' => 'Erro ao buscar filme'], 500);
         }
+
+
+        $data = $response->json();
+
+        // Salva em cache
+        Cache::put($cacheKey, $data, now()->addHours(6));
+
+        // Salva no banco se ainda não estiver lá
+        PopularMovie::firstOrCreate(['title' => $title]);
+
+        return $data;
+
 
         return response()->json($response->json());
     }
