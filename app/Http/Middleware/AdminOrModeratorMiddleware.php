@@ -4,15 +4,16 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminOrModeratorMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!in_array($request->user()->role, ['admin', 'moderator'])) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return $next($request);
         }
 
-        return $next($request);
+        return response()->json(['error' => 'Acesso negado. Apenas administradores podem executar esta ação.'], 403);
     }
 }

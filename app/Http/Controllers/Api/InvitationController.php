@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Mail\Invite;
 use App\Models\Invitation;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -15,28 +16,36 @@ class InvitationController extends Controller
 {
     public function sendInvite(Request $request)
     {
-        // // Valida os dados da requisição
+        // verifica se o usuario ja existe
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            return response()->json(['message' => 'Usuário já existe!'], 409);
+        }
+
         // $request->validate([
         //     'email' => 'required|email|unique:invitations,email', // Garante que o email ainda não recebeu um convite
         //     'role' => 'required|in:admin,moderator,user' // Define a permissão do novo usuário
         // ]);
 
-        // // Gerar token único
         $token = Str::random(32);
+        $invitation = Invitation::where('email', $request->email)->first();
+        if ($invitation) {
+            $invitation->update([
+                'token' => $token,
+                'expires_at' => Carbon::now()->addDays(7)
+            ]);
+        } else {
+            $invitation = Invitation::create([
+                'email' => $request->email,
+                'token' => $token,
+                'role' => $request->role,
+                'expires_at' => Carbon::now()->addDays(7)
+            ]);
+        }
 
-        // // Salvar o convite no banco de dados
-        Invitation::create([
-            'email' => $request->email,
-            'token' => $token,
-            'role' => $request->role,
-            'expires_at' => Carbon::now()->addDays(7) // Expira em 7 dias
-        ]);
-
-        // // Criar os detalhes do e-mail
         $details = [
             'name' => 'Novo Usuário',
             'message' => 'Você está convidado para se cadastrar em nossa plataforma!' . url("/register?token={$token}"),
-            // 'invite_url' => url("/register?token={$token}"), // Link de cadastro com o token
             'date' => now()->format('d \d\e F \d\e Y')
         ];
 

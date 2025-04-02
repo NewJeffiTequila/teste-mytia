@@ -20,7 +20,6 @@ class ResetPasswordMail extends Mailable
     public function __construct($token)
     {
         $this->token = $token;
-
     }
 
     /**
@@ -30,7 +29,7 @@ class ResetPasswordMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Redefinição de Senha')
+        return $this->from(config('mail.from.address'))->subject('Redefinição de Senha')
             ->view('emails.reset_password')
             ->with(['token' => $this->token]);
     }

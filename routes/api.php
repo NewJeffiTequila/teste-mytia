@@ -2,8 +2,6 @@
 
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\ProductController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,7 +17,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [UserController::class, 'createUser']);
 Route::post('/auth/login', [UserController::class, 'loginUser']);
-Route::post('/auth/sendInvite', [InvitationController::class, 'sendInvite']);
-
+Route::post('/forgot-password', [UserController::class, 'sendResetLink']);
+Route::post('/reset-password', [UserController::class, 'resetPassword']);
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/auth/sendInvite', [InvitationController::class, 'sendInvite'])->middleware('admin');
 });
