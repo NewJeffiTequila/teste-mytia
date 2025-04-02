@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\MoviesController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -21,4 +23,8 @@ Route::post('/forgot-password', [UserController::class, 'sendResetLink']);
 Route::post('/reset-password', [UserController::class, 'resetPassword']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/auth/sendInvite', [InvitationController::class, 'sendInvite'])->middleware('admin');
+    Route::get('/movies/search', [MoviesController::class, 'searchMovie']);
+    Route::post('/movies/favorite', [MoviesController::class, 'addFavorite']);
+    Route::get('/movies/favorites', [MoviesController::class, 'listFavorites']);
+    Route::delete('/movies/favorite/{imdb_id}', [MoviesController::class, 'removeFavorite']);
 });
