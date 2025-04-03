@@ -30,4 +30,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/reviews', [ReviewController::class, 'store']);
     Route::get('/reviews/{title}', [ReviewController::class, 'listByTitle']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->middleware('admin');
+    Route::put('/users/{id}/role', [UserController::class, 'updateRole'])->middleware('admin');;
+
 });

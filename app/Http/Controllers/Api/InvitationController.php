@@ -17,6 +17,7 @@ class InvitationController extends Controller
 {
     public function sendInvite(Request $request)
     {
+
         $user = User::where('email', $request->email)->first();
         if ($user) {
             return response()->json(['message' => 'Usuário já existe!'], 409);
@@ -40,7 +41,7 @@ class InvitationController extends Controller
         InvitationJob::dispatch($request->email, $token);
 
         $details = [
-            'name' => 'Novo Usuário',
+            'name' => 'Novo Usuario',
             'message' => 'Você está convidado para se cadastrar em nossa plataforma!' . url("/register?token={$token}"),
             'date' => now()->format('d \d\e F \d\e Y')
         ];

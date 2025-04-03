@@ -35,6 +35,11 @@ class InvitationJob implements ShouldQueue
      */
     public function handle()
     {
-        Mail::to($this->email)->send(new Invite($this->token));
+        $details = [
+            'name' => 'Novo Usuário',
+            'message' => 'Você está convidado para se cadastrar em nossa plataforma! ' . url("/register?token={$this->token}"),
+            'date' => now()->format('d \d\e F \d\e Y'),
+        ];
+        Mail::to($this->email)->send(new Invite($details));
     }
 }

@@ -14,13 +14,8 @@ use Illuminate\Support\Facades\Cache;
 class MoviesController extends Controller
 {
 
-    private $popularMovieRepository;
 
-    public function __construct(PopularMovieRepositoryInterface $popularMovieRepository)
-    {
-        $this->popularMovieRepository = $popularMovieRepository;
-    }
-    // Buscar filme/série na OMDb API
+    public function __construct() {}
     public function searchMovie(Request $request)
     {
         $request->validate(['title' => 'required|string']);
@@ -39,8 +34,10 @@ class MoviesController extends Controller
         $data = $response->json();
 
         Cache::put($cacheKey, $data, now()->addHours(6));
+        PopularMovie::updateOrCreate(
+            ['title' => $data['Title']],
 
-        $this->popularMovieRepository->save($title);
+        );
 
         return $data;
 

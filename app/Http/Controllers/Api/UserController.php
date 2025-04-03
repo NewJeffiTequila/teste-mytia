@@ -145,4 +145,20 @@ class UserController extends Controller
 
         return response()->json(['message' => 'E-mail de redefinição enviado!']);
     }
+    public function updateRole(Request $request, $id)
+    {
+        $request->validate([
+            'role' => 'required|in:admin,moderator,user'
+        ]);
+
+        $user = User::findOrFail($id);
+
+        $user->role = $request->role;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Permissão atualizada com sucesso.',
+            'user' => $user
+        ]);
+    }
 }
