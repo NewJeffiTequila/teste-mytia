@@ -1,64 +1,188 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# 🎥 Laravel Movies API
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Projeto Laravel para gerenciar usuários, convites, favoritos de filmes/séries (via OMDb API), avaliações e permissões de usuários.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Tecnologias
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Laravel 10+
+- Sanctum (Auth API)
+- MySQL
+- OMDb API
+- Docker
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 📆 Como rodar
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### ✅ Com Docker
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. Copie o arquivo `.env.example` para `.env` e configure a conexão com o banco.
+2. Rode:
 
-## Laravel Sponsors
+```bash
+docker-compose up -d
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+3. Acesse o container:
 
-### Premium Partners
+```bash
+docker exec -it app bash
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+4. Dentro do container, execute:
 
-## Contributing
+```bash
+composer install
+php artisan migrate --seed
+php artisan key:generate
+php artisan serve
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+### ✅ Sem Docker (modo local)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. Instale as dependências:
 
-## Security Vulnerabilities
+```bash
+composer install
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. Crie o banco e configure `.env`
 
-## License
+3. Execute as migrations e seeders:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan migrate --seed
+```
+
+4. Gere a chave:
+
+```bash
+php artisan key:generate
+```
+
+5. Rode o servidor local:
+
+```bash
+php artisan serve
+```
+
+---
+
+## 🔐 Autenticação
+
+- Login e registro com Sanctum
+- Convites só podem ser enviados por administradores
+- Algumas rotas requerem autenticação (token Bearer)
+
+---
+
+## 📡 Endpoints da API
+
+### 📌 Autenticação
+
+| Método | Rota                 | Ação                        |
+|--------|----------------------|-----------------------------|
+| POST   | `/auth/register`     | Registrar usuário           |
+| POST   | `/auth/login`        | Login do usuário            |
+| POST   | `/auth/logout`       | Logout                      |
+| POST   | `/auth/sendInvite`   | Enviar convite (Admin)      |
+| POST   | `/auth/reset`        | Enviar e-mail de reset      |
+| POST   | `/auth/reset/confirm`| Redefinir senha             |
+
+---
+
+### 👤 Usuário
+
+| Método | Rota                     | Ação                              |
+|--------|--------------------------|-----------------------------------|
+| GET    | `/user`                  | Info do usuário autenticado       |
+| PUT    | `/users/{id}/role`       | Alterar permissão (Admin)         |
+
+---
+
+### 🎮 Filmes / Séries (OMDb)
+
+| Método | Rota                   | Ação                                  |
+|--------|------------------------|---------------------------------------|
+| GET    | `/movies/search`       | Buscar por título                     |
+| POST   | `/movies/favorite`     | Adicionar aos favoritos               |
+| GET    | `/movies/favorites`    | Listar favoritos do usuário           |
+| DELETE | `/movies/favorite/{id}`| Remover dos favoritos                 |
+
+---
+
+### 📝 Avaliações
+
+| Método | Rota                    | Ação                                 |
+|--------|-------------------------|--------------------------------------|
+| POST   | `/reviews`              | Criar avaliação                      |
+| GET    | `/reviews/{title}`      | Listar avaliações de um título       |
+| DELETE | `/reviews/{id}`         | Deletar avaliação (dono/Admin)       |
+
+---
+
+## ⏱️ Jobs e Tarefas Programadas
+
+- Envio de convite por job
+- Cache de filmes populares via Job programado
+- Limpeza de convites expirados
+- Limpeza de avaliações antigas ou de usuários inativos
+
+---
+
+## 🐳 Docker (docker-compose.yml)
+
+```yaml
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+    container_name: app
+    volumes:
+      - .:/var/www
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    working_dir: /var/www
+    command: >
+      sh -c "composer install &&
+             php artisan migrate --seed &&
+             php artisan serve --host=0.0.0.0 --port=8000"
+
+  db:
+    image: mysql:5.7
+    container_name: db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
+```
+
+---
+
+## ✅ Usuário Padrão
+
+| Email            | Senha |
+|------------------|-------|
+| admin@admin.com  | 123   |
+
+---
+
+Qualquer dúvida ou melhoria, sinta-se à vontade para contribuir! 🎉
+
